@@ -1,0 +1,129 @@
+// Here is the main code for 30 or bust, does not include the object class.
+
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.List;
+
+class Main {
+    public static void main(String[] args) {
+        int min = 1, max = 6; // sets the minimum number and the maximum number that can be rolled per die.
+        int dice1, dice2;
+        List<Player> players = new ArrayList<>();  //Lists the number of players in the game
+        Scanner input = new Scanner(System.in);
+        for (int playerNum = 0; playerNum < 2; playerNum++) {
+
+            System.out.println("Please enter your Username down below to be administered into the game."); // introduction to the game.
+            String playerName = input.nextLine();
+            players.add(new Player(playerName));
+            System.out.println("Welcome " + playerName + ". Please relax and have a fun time.\n");
+        }
+
+        System.out.println("The goal of this game is to accumulate a player score of exactly 30. The first player to score exactly 30 is the Winner!\n" +
+                "You will roll a pair of dice, then you must choose the score of one of the dice or the total of the two dice.\n" +
+                "This value is added to your player score. If your score goes over 30, your score is reset to zero. Player turn changes after each roll of the dice.\n" +
+                "You win when you accumulate a score of exactly 30.\n"); // basic information about the game.
+
+        System.out.println("If you would like more information about strategies, please press 1, if not, please press any number to continue.");
+        int moreInfo = input.nextInt(); // user can choose if they want a strategy guide or not, followed by a "good luck" message.
+        if (moreInfo == 1) {
+            System.out.println("A few good strategies for playing this game is not to worry about having the bigger point score during the game.\nThe closer a player is to " +
+                    "obtaining the number 30, the less options a player has to choose which dice to take. \nStarting off at the beginning, choose both dice to get closer and closer to 30. \n" +
+                    "However, since you are rolling 2 dice, and the numbers go from 1 to 6. \nThe maximum amount numbers you can obtain is 12 separate numbers, with 1 being the lowest and 12 being the highest.\n" +
+                    "When a player gets closer and closer to 30, their options are limited due to how going over 30 resets the score to 0. \nOnce a player goes over the number 20, it's best to start choosing one die as opposed to two." +
+                    "\nWhy? Well, reducing the number count from 12 numbers to 6, you have effectively cut your score opportunity by half.\nB" +
+                    "ut that doesn't matter because what does is getting a score of 30. Unless both numbers are very close in terms of score, (ex. rolling a 1 and 2) try to choose the lower number.\n" +
+                    "This is because you'll have a higher chance of getting a number that can get you to 30. 24 to 29 are all numbers that can be won with a single die.\nBut the further you go up in numbers, the less chances you'll get to getting that point to win the game." +
+                    "\n");
+        }
+        System.out.println("Good luck players! May the best player win!\n");
+
+        boolean gaming = true; // boolean to keep the game going when a player does not reach a score of 30.
+        int rounds = 1; // start of rounds
+        int playerChoice;
+
+
+        while (gaming) { // Loop until someone wins the game
+            for (Player currentPlayer : players) { // sets the number of players
+                System.out.println(currentPlayer.getUsername() + " it is your turn to roll. Give it your best shot.");
+                dice1 = min + (int) (Math.random() * ((max - min) + 1)); // dice rolls a random number
+                dice2 = min + (int) (Math.random() * ((max - min) + 1));
+                System.out.println("You rolled " + dice1 + " and " + dice2);
+                int dieTotal = dice1 + dice2; // adds the dice together and reads it for the player.
+                System.out.println("The total of both dice is " + dieTotal);
+                System.out.println(currentPlayer.getCurrentScore() + " is your current score " + currentPlayer.getUsername() + ".");
+                playerChoice = 0;
+                while ((playerChoice != 1) && (playerChoice != 2) && (playerChoice != 3)) {
+                    System.out.println("Do you wish to keep: (1) Die 1, (2) Die 2, or (3) keep the total of both Die. Please respond with 1, 2, or 3 to determine your current score.");
+                    playerChoice = input.nextInt(); // lets players put in what addition to their score they want.
+                    switch (playerChoice) {
+                        case 1:
+                            currentPlayer.addDice(dice1); // adds the first die
+                            break;
+                        case 2:
+                            currentPlayer.addDice(dice2); // adds the second die
+                            break;
+                        case 3:
+                            currentPlayer.addDice(dice1 + dice2); // adds both dice together.
+                            break;
+                        default:
+                            System.out.println("That is not a valid choice. You must enter 1, 2, or 3 next time.");
+
+                    }
+                }
+                System.out.println("New score is: " + currentPlayer.getCurrentScore());
+
+
+                if (currentPlayer.getCurrentScore() == 30) { // Determines if a player has reached a score of 30. If a player goes over, score resets to 0.
+                    System.out.println("*** Congratulations " + currentPlayer.getUsername() + "! You win! You have reached a score of 30! Hope you all had some fun! ***");
+                    gaming = false;
+                    break;
+                } else if (currentPlayer.getCurrentScore() > 30) {
+                    System.out.println("*** That score is over 30. Your score has been reset to 0. ***");
+                    currentPlayer.setCurrentScore(0);
+                }
+
+                System.out.println("----------------------------------------");
+                currentPlayer.setCurrentScore(currentPlayer.getCurrentScore());
+
+            }
+            System.out.println("          Current Leaderboard"); // Displays the current scores of all players.
+            Player leadPlayer = null; // Defines who is in first and second place.
+            Player secondPlace = null;
+
+            for (Player player : players) { // reads out all players in an index and displays name and score.
+                System.out.printf("%16s %4d\n", player.getUsername(), player.getCurrentScore());
+                if (leadPlayer == null) { // Sets first player as leader initially.
+                    leadPlayer = player;
+                } else {
+                    if (player.getCurrentScore() > leadPlayer.getCurrentScore()) { // Sets player with higher score as the lead player.
+                        secondPlace = leadPlayer;
+                        leadPlayer = player;
+                    } else if (secondPlace == null || secondPlace.getCurrentScore() < player.getCurrentScore()) { // Sets former lead player as second place.
+                        secondPlace = player;
+                    }
+                }
+            }
+            assert secondPlace != null;
+            int difference = leadPlayer.getCurrentScore() - secondPlace.getCurrentScore(); // Calculates difference between both players' scores.
+            if (leadPlayer.getCurrentScore() != 30) {
+                if (leadPlayer.getCurrentScore() == secondPlace.getCurrentScore()) { // Custom message for if both players' scores are the same.
+                    System.out.println("\n" + leadPlayer.getUsername() + " and " + secondPlace.getUsername() + " have the same score at " + leadPlayer.getCurrentScore() + " points! What an intense game!");
+                } else { // prints message based on who is in the lead and who is behind.
+                    System.out.println("\n" + leadPlayer.getUsername() + " is in the lead with " + leadPlayer.getCurrentScore() + "! Everyone else has a chance to catch up!" +
+                            " The game is not over yet! " + secondPlace.getUsername() + " needs at least " + difference + " point(s) to catch up!");
+                }
+
+            }
+            else { // prints message only when game is over.
+                System.out.println("\n" + leadPlayer.getUsername() + " has won the game with " + leadPlayer.getCurrentScore() + " points! " +
+                        "" + secondPlace.getUsername() + " was behind by " + difference + " point(s)! Excellent game everyone!" );
+            }
+            System.out.println("----------------------------------------");
+            System.out.println("We have gone " + rounds++ + " round(s) in the game!"); // counts the number of rounds it takes for a player to win.
+
+
+        }
+
+    }
+
+}
